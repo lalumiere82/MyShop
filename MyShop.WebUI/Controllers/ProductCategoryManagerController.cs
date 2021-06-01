@@ -1,4 +1,5 @@
-﻿using MyShop.Core.Models;
+﻿using MyShop.Core.Contracts;
+using MyShop.Core.Models;
 using MyShop.DataAccess.InMemory;
 using System;
 using System.Collections.Generic;
@@ -8,110 +9,111 @@ using System.Web.Mvc;
 
 namespace MyShop.WebUI.Controllers
 {
-	public class ProductCategoryManagerController : Controller
-	{
-		InMemoryRepository<ProductCategory> context;
+    public class ProductCategoryManagerController : Controller
+    {
+        IRepository<ProductCategory> context;
 
-		public ProductCategoryManagerController()
-		{
-			context = new InMemoryRepository<ProductCategory>();
-		}
-		// GET: ProductManager
-		public ActionResult Index()
-		{
-			List<ProductCategory> productCategories = context.Collection().ToList();
-			return View(productCategories);
-		}
+        public ProductCategoryManagerController(IRepository<ProductCategory> context)
+        {
+            this.context = context;
+        }
+        // GET: ProductManager
+        public ActionResult Index()
+        {
+            List<ProductCategory> productCategories = context.Collection().ToList();
+            return View(productCategories);
+        }
 
-		public ActionResult Create()
-		{
-			ProductCategory productCategory = new ProductCategory();
-			return View(productCategory);
-		}
+        public ActionResult Create()
+        {
+            ProductCategory productCategory = new ProductCategory();
+            return View(productCategory);
+        }
 
-		[HttpPost]
-		public ActionResult Create(ProductCategory productCategory)
-		{
-			if (!ModelState.IsValid)
-			{
-				return View(productCategory);
-			}
-			else
-			{
-				context.Insert(productCategory);
-				context.Commit();
+        [HttpPost]
+        public ActionResult Create(ProductCategory productCategory)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(productCategory);
+            }
+            else
+            {
+                context.Insert(productCategory);
+                context.Commit();
 
-				return RedirectToAction("Index");
-			}
+                return RedirectToAction("Index");
+            }
 
-		}
+        }
 
-		public ActionResult Edit(string Id)
-		{
-			ProductCategory productCategory = context.Find(Id);
-			if (productCategory == null)
-			{
-				return HttpNotFound();
-			}
-			else
-			{
-				return View(productCategory);
-			}
-		}
+        public ActionResult Edit(string Id)
+        {
+            ProductCategory productCategory = context.Find(Id);
+            if (productCategory == null)
+            {
+                return HttpNotFound();
+            }
+            else
+            {
+                return View(productCategory);
+            }
+        }
 
-		[HttpPost]
-		public ActionResult Edit(ProductCategory product, string Id)
-		{
-			ProductCategory productCategoryToEdit = context.Find(Id);
+        [HttpPost]
+        public ActionResult Edit(ProductCategory product, string Id)
+        {
+            ProductCategory productCategoryToEdit = context.Find(Id);
 
-			if (productCategoryToEdit == null)
-			{
-				return HttpNotFound();
-			}
-			else
-			{
-				if (!ModelState.IsValid)
-				{
-					return View(product);
-				}
+            if (productCategoryToEdit == null)
+            {
+                return HttpNotFound();
+            }
+            else
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View(product);
+                }
 
-				productCategoryToEdit.Category = product.Category;
+                productCategoryToEdit.Category = product.Category;
 
-				context.Commit();
+                context.Commit();
 
-				return RedirectToAction("Index");
-			}
-		}
+                return RedirectToAction("Index");
+            }
+        }
 
-		public ActionResult Delete(string Id)
-		{
-			ProductCategory productCategoryToDelete = context.Find(Id);
+        public ActionResult Delete(string Id)
+        {
+            ProductCategory productCategoryToDelete = context.Find(Id);
 
-			if (productCategoryToDelete == null)
-			{
-				return HttpNotFound();
-			}
-			else
-			{
-				return View(productCategoryToDelete);
-			}
-		}
+            if (productCategoryToDelete == null)
+            {
+                return HttpNotFound();
+            }
+            else
+            {
+                return View(productCategoryToDelete);
+            }
+        }
 
-		[HttpPost]
-		[ActionName("Delete")]
-		public ActionResult ConfirmDelete(string Id)
-		{
-			ProductCategory productCategoryToDelete = context.Find(Id);
+        [HttpPost]
+        [ActionName("Delete")]
+        public ActionResult ConfirmDelete(string Id)
+        {
+            ProductCategory productCategoryToDelete = context.Find(Id);
 
-			if (productCategoryToDelete == null)
-			{
-				return HttpNotFound();
-			}
-			else
-			{
-				context.Delete(Id);
-				return RedirectToAction("Index");
-			}
-		}
-	}
+            if (productCategoryToDelete == null)
+            {
+                return HttpNotFound();
+            }
+            else
+            {
+                context.Delete(Id);
+                context.Commit();
+                return RedirectToAction("Index");
+            }
+        }
+    }
 }
